@@ -171,7 +171,7 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
             timePasswordChanged = System.currentTimeMillis()
         )
 
-        checkValid(toInsert)
+        checkValidWithNoDupes(toInsert)
 
         val sp = list.find { it.id == toInsert.id }
         if (sp != null) {
@@ -217,7 +217,7 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
                     System.currentTimeMillis()
                 })
 
-        checkValid(newRecord)
+        checkValidWithNoDupes(newRecord)
 
         list = list.filter { it.id != login.id }
 
@@ -268,6 +268,25 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
         if (login.formSubmitURL == null && login.httpRealm == null) {
             throw InvalidRecordException(
                     "Invalid login: Neither `formSubmitUrl` and `httpRealm` are present")
+        }
+    }
+
+    @Suppress("ThrowsCount")
+    private fun checkValidWithNoDupes(login: ServerPassword) {
+        checkValid(login)
+
+        val hasDupe = list.any {
+            it.hostname == login.hostname &&
+            it.username == login.username &&
+            (
+                it.formSubmitURL == login.formSubmitURL ||
+                it.httpRealm == login.httpRealm
+            )
+        }
+
+        if (hasDupe) {
+            throw InvalidRecordException(
+                    "Invalid login: Login already exists")
         }
     }
 }
