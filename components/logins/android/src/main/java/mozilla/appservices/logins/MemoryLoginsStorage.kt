@@ -191,7 +191,7 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
         for (login in logins) {
             val toInsert = login.copy(id = UUID.randomUUID().toString())
             try {
-                checkValid(toInsert)
+                checkValidWithNoDupes(toInsert)
                 list += toInsert
             } catch (e: InvalidRecordException) {
                 numErrors += 1
@@ -276,6 +276,7 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
         checkValid(login)
 
         val hasDupe = list.any {
+            it.id != login.id &&
             it.hostname == login.hostname &&
             it.username == login.username &&
             (

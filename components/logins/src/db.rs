@@ -515,7 +515,7 @@ impl LoginDb {
     }
 
     pub fn update(&self, login: Login) -> Result<()> {
-        login.check_valid()?;
+        self.check_valid_with_no_dupes(&login)?;
         let tx = self.unchecked_transaction()?;
         // Note: These fail with DuplicateGuid if the record doesn't exist.
         self.ensure_local_overlay_exists(login.guid_str())?;
@@ -576,15 +576,11 @@ impl LoginDb {
     }
 
     pub fn dupe_exists(&self, login: &Login) -> Result<bool> {
-        let hostname = &login.hostname;
-        let username = &login.username;
-        let http_realm = login.http_realm.as_ref();
-        let form_submit = login.form_submit_url.as_ref();
-
         Ok(self.db.query_row_named(
             "SELECT EXISTS(
                 SELECT 1 FROM loginsL
                 WHERE is_deleted = 0
+                    AND guid <> :guid
                     AND hostname = :hostname
                     AND NULLIF(username, '') = :username
                     AND (
@@ -592,11 +588,12 @@ impl LoginDb {
                         OR
                         httpRealm = :http_realm
                     )
-                    
+
                 UNION ALL
 
                 SELECT 1 FROM loginsM
                 WHERE is_overridden = 0
+                    AND guid <> :guid
                     AND hostname = :hostname
                     AND NULLIF(username, '') = :username
                     AND (
@@ -606,10 +603,11 @@ impl LoginDb {
                     )
              )",
             named_params! {
-                ":hostname": hostname,
-                ":username": username,
-                ":http_realm": http_realm,
-                ":form_submit": form_submit,
+                ":guid": &login.guid,
+                ":hostname": &login.hostname,
+                ":username": &login.username,
+                ":http_realm": login.http_realm.as_ref(),
+                ":form_submit": login.form_submit_url.as_ref(),
             },
             |row| row.get(0),
         )?)
