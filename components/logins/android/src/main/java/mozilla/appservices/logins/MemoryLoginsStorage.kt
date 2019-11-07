@@ -271,6 +271,10 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
         }
     }
 
+    override fun ensureValid(login: ServerPassword) {
+        checkValidWithNoDupes(login)
+    }
+
     @Suppress("ThrowsCount")
     private fun checkValidWithNoDupes(login: ServerPassword) {
         checkValid(login)

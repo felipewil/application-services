@@ -219,4 +219,12 @@ interface LoginsStorage : AutoCloseable {
      * Note: handles do not remain valid after locking / unlocking the logins database.
      */
     fun getHandle(): Long
+
+    /**
+     * Checks if login already exists.
+     *
+     * @throws [LoginsStorageException] On unexpected errors (IO failure, rust panics, etc)
+     */
+    @Throws(LoginsStorageException::class)
+    fun ensureValid(login: ServerPassword)
 }

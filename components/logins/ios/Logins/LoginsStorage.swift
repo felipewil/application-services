@@ -205,6 +205,17 @@ open class LoginsStorage {
         }
     }
 
+    /// Check that the record is valid and a duplicate record doesn't exist.
+    open func check_valid(id: String) throws -> Bool {
+        return try queue.sync {
+            let engine = try self.getUnlocked()
+            let boolAsU8 = try LoginsStoreError.unwrap { err in
+                sync15_passwords_check_valid(engine, id, err)
+            }
+            return boolAsU8 != 0
+        }
+    }
+
     /// Bump the usage count for the record with the given id.
     ///
     /// Throws `LoginStoreError.NoSuchRecord` if there was no such record.

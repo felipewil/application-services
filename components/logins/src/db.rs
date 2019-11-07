@@ -576,6 +576,8 @@ impl LoginDb {
     }
 
     pub fn dupe_exists(&self, login: &Login) -> Result<bool> {
+        // Note: the query below compares the guids of the given login with existing logins
+        //  to prevent a login from being considered a duplicate of itself (e.g. during updates).
         Ok(self.db.query_row_named(
             "SELECT EXISTS(
                 SELECT 1 FROM loginsL

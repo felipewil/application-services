@@ -79,6 +79,10 @@ uint8_t sync15_passwords_delete(Sync15PasswordEngineHandle handle,
                                 char const *_Nonnull id,
                                 Sync15PasswordsError *_Nonnull error);
 
+uint8_t sync15_passwords_check_valid(Sync15PasswordEngineHandle handle,
+                                char const *_Nonnull record_json,
+                                Sync15PasswordsError *_Nonnull error);
+
 char *_Nullable sync15_passwords_add(Sync15PasswordEngineHandle handle,
                                      char const *_Nonnull json,
                                      Sync15PasswordsError *_Nonnull error);
