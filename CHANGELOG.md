@@ -1,6 +1,16 @@
+# v0.42.4 (_2019-11-13_)
+
+[Full Changelog](https://github.com/mozilla/application-services/compare/v0.42.3...v0.42.4)
+
+## General
+
+### What's New
+
+- Synced Tabs is available as an Android component in the `org.mozilla.appservices.experimental.remotetabs` maven package.
+
 # v0.42.3 (_2019-11-04_)
 
-[Full Changelog](https://github.com/mozilla/application-services/compare/v0.42.3...master)
+[Full Changelog](https://github.com/mozilla/application-services/compare/v0.42.2...v0.42.3)
 
 ## General
 
