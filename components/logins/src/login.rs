@@ -2,6 +2,135 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//
+//  N.B. if you're making a documentation change here, you might also want to make it in:
+//
+//    * The API docs in ../ios/Logins/LoginRecord.swift
+//    * The API docs in ../android/src/main/java/mozilla/appservices/logins/ServerPassword.kt
+//    * The android-components docs at
+//      https://github.com/mozilla-mobile/android-components/tree/master/components/service/sync-logins
+//
+
+//! Login Records
+//! =============
+//!
+//! The core datatype managed by this component is a "login record", which contains the following fields:
+//! 
+//!  - `id`:    A unique string identifier for this record.
+//!
+//!              Consumers may assume that `id` contains only "safe" ASCII characters but should otherwise
+//!              treat this it as an opaque identifier. It should be left blank when adding a new record,
+//!              in which case a new id will be automatically generated.
+//!
+//!  - `hostname`:  The origin at which this login can be used, as a string.
+//!                 The login should only be used on sites that match this origin.
+//!                 This field is required, must be a valid origin, and must not be set to the empty string.
+//!
+//!                 YES, THIS FIELD IS CONFUSINGLY NAMED. IT SHOULD BE A FULL ORIGIN, NOT A HOSTNAME.
+//!                 WE INTEND TO RENAME THIS TO `origin` IN A FUTURE RELEASE.
+//!
+//!                 XXX TODO: we intend to store this as punycode. Should we only accept punycode here?
+//!                 XXX TODO: should we always return this as punycode when reading existing records?
+//!                 XXX TODO: could it ever be empty for legacy reasons, e.g. in synced data?
+//!
+//!  - `password`:  The saved password, as a string.
+//!                 This field is required and must not be set to the empty string.
+//!                 There are no other restrictions on the contents of this string.
+//!
+//!                 XXX TODO: could it ever be empty for legacy reasons, e.g. in synced data?
+//!                 XXX TODO: can this just be arbitrary unicode?
+//!
+//!  - `username`:  The username associated with this login, if any, as a string.
+//!                 This field may be None if no username is associated with the login.
+//!                 There are no restrictions on the contents of this string.
+//!
+//!                 XXX TODO: can it be blank? does that mean the same thing as None?
+//!
+//!  - `httpRealm`: The challenge string for HTTP Basic authentication, if any.
+//!                 If present, the login should only be used in response to a HTTP Basic Auth
+//!                 challenge that specifies a matching realm. There are no restrictions on the
+//!                 contents of this string.
+//!
+//!                 This field must not be present if `formSubmitURL` is set, since they indicate
+//!                 different types of login (HTTP-Auth based versus form-based).
+//!
+//!                 XXX TODO: can it be blank? does being blank count as being present for the
+//!                 purposes of conflicting with `formSubmitURL`? does that mean it can be used
+//!                 with any realm?
+//!
+//!  - `formSubmitURL`: The target origin of forms in which this login can be used, if any, as a string.
+//!                     If present, the login should only be used in forms whose target submission URL
+//!                     matches this origin. This field must be a valid origin.
+//!
+//!                 YES, THIS FIELD IS CONFUSINGLY NAMED. IT SHOULD BE AN ORIGIN, NOT A FULL URL.
+//!                 WE INTEND TO RENAME THIS TO `formSubmitOrigin` IN A FUTURE RELEASE.
+//!
+//!                 XXX TODO: can it be blank? does being blank count as being present for the
+//!                 purposes of conflicting with `formSubmitURL`? does that mean it can be used
+//!                 with any realm?
+//!
+//!                 XXX TODO: we intend to store this as punycode. Should we only accept punycode here?
+//!                 XXX TODO: should we always return this as punycode when reading existing records?
+//!
+//!                 XXX TODO: if neither `httpRealm` or `formSubmitURL` are present, what does that
+//!                 mean for how the login can be used? Does this ever happen in practice?
+//!                 Our docs say "exactly one is allowed to be present" but that doesn't rule out
+//!                 having *neither* of them present.
+//!
+//!  -`usernameField`:  The HTML form field into which the `username` field should be filled, if any.
+//!                     If present, the login should only be used in forms with a corresponding field.
+//!                     There are no restrictions on the contents of this string.
+//!
+//!                 XXX TODO: can this be present if `formSubmitURL` is not set?
+//!
+//!  -`passwordField`:  The HTML form field into which the `password` field should be filled, if any.
+//!                     If present, the login should only be used in forms with a corresponding field.
+//!                     There are no restrictions on the contents of this string.
+//!
+//!                 XXX TODO: can this be present if `formSubmitURL` is not set?
+//!
+//!  - `timesUsed`: A lower bound on the number of times this record as been "used", as an integer.
+//!                 This number may not record uses that occurred on other devices, since some legacy
+//!                 sync clients do not record this information. It may be zero for records obtained
+//!                 via sync that have never been used locally.
+//!
+//!                 This field is managed internally by the logins store and any attempt by the
+//!                 application to specify a value will be ignored.
+//!
+//!                 XXX TODO: are these local machine timestamps, and thus possibly wildly inaccurate?
+//!                 XXX TODO: should we talk about merge strategies here?
+//!
+//!  - `timeCreated`: An upper bound on the time of creation of this login, in integer milliseconds from the unix epoch.
+//!                   This is an upper bound because some legacy sync clients do not record this information;
+//!                   in that case newer clients set `timeCreated` when they see the record for the first time.
+//!
+//!                 This field is managed internally by the logins store and any attempt by the
+//!                 application to specify a value will be ignored.
+//!
+//!                 XXX TODO: are these local machine timestamps, and thus possibly wildly inaccurate?
+//!                 XXX TODO: should we talk about merge strategies here?
+//!
+//!  - `timeLastUsed`: A lower bound on the time of last use of this login, in integer milliseconds from the unix epoch.
+//!                    This is a lower bound because some legacy sync clients do not record this information;
+//!                    in that case newer clients set `timeLastUsed` when they use the record for the first time.
+//!
+//!                 This field is managed internally by the logins store and any attempt by the
+//!                 application to specify a value will be ignored.
+//!
+//!                 XXX TODO: are these local machine timestamps, and thus possibly wildly inaccurate?
+//!                 XXX TODO: should we talk about merge strategies here?
+//!
+//!  - `timePasswordChanged`: A lower bound on the time that the `password` field was last changed, in integer milliseconds from the unix epoch.
+//!                           This is a lower bound because some legacy sync clients do not record this information;
+//!                           in that case newer clients set `timePasswordChanged` when they change the `password` field.
+//!
+//!                 This field is managed internally by the logins store and any attempt by the
+//!                 application to specify a value will be ignored.
+//!
+//!                 XXX TODO: are these local machine timestamps, and thus possibly wildly inaccurate?
+//!                 XXX TODO: should we talk about merge strategies here?
+//!
+
 use crate::error::*;
 use crate::util;
 use rusqlite::Row;
