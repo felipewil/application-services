@@ -206,13 +206,12 @@ open class LoginsStorage {
     }
 
     /// Check that the record is valid and a duplicate record doesn't exist.
-    open func check_valid(id: String) throws -> Bool {
+    open func checkValid(id: String) throws {
         return try queue.sync {
             let engine = try self.getUnlocked()
-            let boolAsU8 = try LoginsStoreError.unwrap { err in
+            try LoginsStoreError.unwrap { err in
                 sync15_passwords_check_valid(engine, id, err)
             }
-            return boolAsU8 != 0
         }
     }
 

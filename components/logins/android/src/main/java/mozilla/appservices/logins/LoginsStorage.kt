@@ -221,7 +221,15 @@ interface LoginsStorage : AutoCloseable {
     fun getHandle(): Long
 
     /**
-     * Checks if login already exists.
+     * Checks if login already exists and is valid. Throws a [InvalidRecordException] if it is not.
+     *
+     * ```
+     * try {
+     *     db.checkValid(record)
+     * } catch (e: InvalidRecordException) {
+     *     // The reason the record is invalid is stored in `e.reason`.
+     * }
+     * ```
      *
      * @throws [LoginsStorageException] On unexpected errors (IO failure, rust panics, etc)
      */

@@ -12,10 +12,16 @@ typedef enum Sync15PasswordsErrorCode {
     Sync15Passwords_AuthInvalidError = 1,
     Sync15Passwords_NoSuchRecord     = 2,
     Sync15Passwords_DuplicateGuid    = 3,
-    Sync15Passwords_InvalidLogin     = 4,
-    Sync15Passwords_InvalidKeyError  = 5,
-    Sync15Passwords_NetworkError     = 6,
-    Sync15Passwords_InterruptedError = 7,
+    Sync15Passwords_InvalidKeyError  = 4,
+    Sync15Passwords_NetworkError     = 5,
+    Sync15Passwords_InterruptedError = 6,
+
+    Sync15Passwords_InvalidLogin_EmptyHostname = 64 + 0,
+    Sync15Passwords_InvalidLogin_EmptyPassword = 64 + 1,
+    Sync15Passwords_InvalidLogin_DuplicateLogin = 64 + 2,
+    Sync15Passwords_InvalidLogin_BothTargets = 64 + 3,
+    Sync15Passwords_InvalidLogin_NoTarget = 64 + 4,
+
 } Sync15PasswordsErrorCode;
 
 typedef struct Sync15PasswordsError {
@@ -79,7 +85,7 @@ uint8_t sync15_passwords_delete(Sync15PasswordEngineHandle handle,
                                 char const *_Nonnull id,
                                 Sync15PasswordsError *_Nonnull error);
 
-uint8_t sync15_passwords_check_valid(Sync15PasswordEngineHandle handle,
+void sync15_passwords_check_valid(Sync15PasswordEngineHandle handle,
                                 char const *_Nonnull record_json,
                                 Sync15PasswordsError *_Nonnull error);
 

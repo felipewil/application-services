@@ -256,18 +256,20 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
     @Suppress("ThrowsCount")
     private fun checkValid(login: ServerPassword) {
         if (login.hostname == "") {
-            throw InvalidRecordException("Invalid login: Hostname is empty")
+            throw InvalidRecordException("Invalid login: Hostname is empty", InvalidLoginReason.EMPTY_HOSTNAME)
         }
         if (login.password == "") {
-            throw InvalidRecordException("Invalid login: Password is empty")
+            throw InvalidRecordException("Invalid login: Password is empty", InvalidLoginReason.EMPTY_PASSWORD)
         }
         if (login.formSubmitURL != null && login.httpRealm != null) {
             throw InvalidRecordException(
-                    "Invalid login: Both `formSubmitUrl` and `httpRealm` are present")
+                    "Invalid login: Both `formSubmitUrl` and `httpRealm` are present",
+                    InvalidLoginReason.BOTH_TARGETS)
         }
         if (login.formSubmitURL == null && login.httpRealm == null) {
             throw InvalidRecordException(
-                    "Invalid login: Neither `formSubmitUrl` and `httpRealm` are present")
+                    "Invalid login: Neither `formSubmitUrl` and `httpRealm` are present",
+                    InvalidLoginReason.NO_TARGET)
         }
     }
 
@@ -291,7 +293,8 @@ class MemoryLoginsStorage(private var list: List<ServerPassword>) : AutoCloseabl
 
         if (hasDupe) {
             throw InvalidRecordException(
-                    "Invalid login: Login already exists")
+                    "Invalid login: Login already exists",
+                    InvalidLoginReason.DUPLICATE_LOGIN)
         }
     }
 }
