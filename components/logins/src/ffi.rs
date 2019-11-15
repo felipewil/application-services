@@ -4,7 +4,7 @@
 
 // This module implement the traits that make the FFI code easier to manage.
 
-use crate::{Error, ErrorKind, Login, InvalidLogin};
+use crate::{Error, ErrorKind, InvalidLogin, Login};
 use ffi_support::{implement_into_ffi_by_json, ErrorCode, ExternError};
 use sync15::ErrorKind as Sync15ErrorKind;
 
@@ -40,7 +40,7 @@ pub mod error_codes {
     // InvalidLogin items that can actually be triggered, the others
     // (if they happen accidentally) will come through as unexpected.
 
-    pub const INVALID_LOGIN_EMPTY_HOSTNAME: i32 = 64 + 0;
+    pub const INVALID_LOGIN_EMPTY_HOSTNAME: i32 = 64;
     pub const INVALID_LOGIN_EMPTY_PASSWORD: i32 = 64 + 1;
     pub const INVALID_LOGIN_DUPLICATE_LOGIN: i32 = 64 + 2;
     pub const INVALID_LOGIN_BOTH_TARGETS: i32 = 64 + 3;

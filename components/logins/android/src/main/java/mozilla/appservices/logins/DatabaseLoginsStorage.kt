@@ -207,7 +207,7 @@ class DatabaseLoginsStorage(private val dbPath: String) : AutoCloseable, LoginsS
         }
     }
 
-    @Throws(LoginsStorageException::class)
+    @Throws(InvalidRecordException::class)
     override fun ensureValid(login: ServerPassword) {
         val s = login.toJSON().toString()
         rustCallWithLock { raw, error ->

@@ -18,3 +18,8 @@
 
 - the unused `regenerate_endpoints()` function has been removed.
 
+## Logins
+
+### What's new
+
+- Added ability to prevent insertion/updates from creating dupes via `LoginsStorage.ensureValid`. ([#2101](https://github.com/mozilla/application-services/pull/2101))

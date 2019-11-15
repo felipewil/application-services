@@ -205,12 +205,13 @@ open class LoginsStorage {
         }
     }
 
-    /// Check that the record is valid and a duplicate record doesn't exist.
-    open func checkValid(id: String) throws {
+    /// Ensure that the record is valid and a duplicate record doesn't exist.
+    open func ensureValid(login: LoginRecord) throws {
+        let json = try login.toJSON()
         return try queue.sync {
             let engine = try self.getUnlocked()
             try LoginsStoreError.unwrap { err in
-                sync15_passwords_check_valid(engine, id, err)
+                sync15_passwords_check_valid(engine, json, err)
             }
         }
     }

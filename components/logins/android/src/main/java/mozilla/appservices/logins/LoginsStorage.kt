@@ -225,14 +225,14 @@ interface LoginsStorage : AutoCloseable {
      *
      * ```
      * try {
-     *     db.checkValid(record)
+     *     db.ensureValid(record)
      * } catch (e: InvalidRecordException) {
      *     // The reason the record is invalid is stored in `e.reason`.
      * }
      * ```
      *
-     * @throws [LoginsStorageException] On unexpected errors (IO failure, rust panics, etc)
+     * @throws [InvalidRecordException] On unexpected errors (IO failure, rust panics, etc)
      */
-    @Throws(LoginsStorageException::class)
+    @Throws(InvalidRecordException::class)
     fun ensureValid(login: ServerPassword)
 }
