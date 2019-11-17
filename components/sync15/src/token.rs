@@ -240,7 +240,7 @@ impl<TF: TokenFetcher> TokenProviderImpl<TF> {
 
         let credentials = hawk::Credentials {
             id: token.id.clone(),
-            key: hawk::Key::new(token.key.as_bytes(), hawk::Digest::sha256())?,
+            key: hawk::Key::new(token.key.as_bytes(), hawk::Digest::sha256()),
         };
 
         Ok(TokenContext::new(
