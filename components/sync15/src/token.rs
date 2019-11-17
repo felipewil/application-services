@@ -12,6 +12,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
+use hawk::{ SHA256 };
 
 /// Tokenserver's timestamp is X-Timestamp and not X-Weave-Timestamp.
 const RETRY_AFTER: &str = "Retry-After";
@@ -240,7 +241,7 @@ impl<TF: TokenFetcher> TokenProviderImpl<TF> {
 
         let credentials = hawk::Credentials {
             id: token.id.clone(),
-            key: hawk::Key::new(token.key.as_bytes(), hawk::Digest::sha256()),
+            key: hawk::Key::new(token.key.as_bytes(), SHA256),
         };
 
         Ok(TokenContext::new(
